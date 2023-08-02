@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-3 py-2">
+  <div class="flex flex-col gap-3 py-2 max-h-fit overflow-auto">
     <Task v-for="i in 3"></Task>
   </div>
 </template>

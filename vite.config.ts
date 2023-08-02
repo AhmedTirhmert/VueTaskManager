@@ -10,16 +10,18 @@ export default defineConfig({
     vue(),
     AutoImport({ imports: ['vue'], vueTemplate: true }),
     Components({
-      dts: true,
+      dts: 'src/components.d.ts',
       dirs: ['src/components'],
-      extensions: ['vue'],
+      extensions: ['vue', 'md'],
+      include: [/\.vue$/, /\.vue\?vue/],
       globs: ['src/components/*.{vue}'],
       deep: true
     })
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@types': fileURLToPath(new URL('./types.d.ts', import.meta.url))
     }
   }
 })
