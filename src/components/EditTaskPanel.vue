@@ -5,17 +5,19 @@
     @click="emit('hide')"
   >
     <div
-      class="panel fixed right-0 top-0 h-screen bg-blue-panel shadow-zinc-500/50 w-full md:w-1/4 transition-all delay-100 duration-300 p-5 py-8 flex flex-col align-middle gap-14"
+      class="panel fixed left-0 top-0 h-screen bg-blue-panel shadow-zinc-500/50 w-full md:w-1/4 transition-all delay-100 duration-300 p-5 py-8 flex flex-col align-middle gap-14"
       :class="{ 'show-panel': isOpen }"
       @click.stop=""
     >
       <div class="flex items-center justify-between">
-        <h2 class="font-bold text-3xl">Create Task</h2>
+        <h2 class="font-bold text-3xl">
+          Update Task <span class="text-zinc-400"> #{{ task.id }}</span>
+        </h2>
         <close @click="emit('hide')" />
       </div>
 
       <form
-        @submit.prevent="createTask"
+        @submit.prevent="updateTask"
         @reset="closePanel"
         class="flex flex-col gap-5 flex-1 justify-between"
       >
@@ -23,8 +25,7 @@
           <div>
             <label for="status" class="block mb-2 text-sm font-medium text-gray-300">Status:</label>
             <select
-              required
-              v-model="newTask.status"
+              v-model="task.status"
               id="status"
               class="text-gray-100 bg-blue-card rounded-lg border border-blue-card/50 focus:ring-blue-primary/70 focus:border-blue-primary/70 block w-full px-2.5"
             >
@@ -39,8 +40,7 @@
               >Task Description:</label
             >
             <textarea
-              required
-              v-model="newTask.description"
+              v-model="task.description"
               id="taskDescription"
               rows="6"
               class="block p-2.5 w-full max-h-60 text-sm text-gray-100 bg-blue-card rounded-lg border border-blue-card/50 focus:ring-blue-primary/70 focus:border-blue-primary/70"
@@ -53,8 +53,7 @@
               >Assign To:</label
             >
             <select
-              required
-              v-model="newTask.user"
+              v-model="task.user"
               id="users"
               class="text-gray-100 bg-blue-card rounded-lg border border-blue-card/50 focus:ring-blue-primary/70 focus:border-blue-primary/70 block w-full px-2.5"
             >
@@ -68,8 +67,7 @@
               >Priority:</label
             >
             <select
-              required
-              v-model="newTask.priority"
+              v-model="task.priority"
               id="priority"
               class="text-gray-100 bg-blue-card rounded-lg border border-blue-card/50 focus:ring-blue-primary/70 focus:border-blue-primary/70 block w-full px-2.5"
             >
@@ -83,28 +81,27 @@
               >Issue Date:</label
             >
             <input
-              required
-              v-model="newTask.issueDate"
+              v-model="task.issueDate"
               id="issueDate"
               type="datetime-local"
-              :max="new Date().toISOString().split('T')[0]"
               class="block p-2.5 w-full text-sm text-gray-100 bg-blue-card rounded-lg border border-blue-card/50 focus:ring-blue-primary/70 focus:border-blue-primary/70"
             />
           </div>
         </div>
         <div class="flex">
           <button
-            type="submit"
-            class="w-1/2 text-white block transition-colors delay-100 bg-blue-primary hover:bg-blue-primary/75 disabled:bg-slate-600/80 disabled:cursor-progress focus:ring-0 font-medium rounded-md text-sm px-5 py-2 mr-2 mb-2"
-            :disabled="isSaving"
-          >
-            <span v-if="isSaving"><Spinner /> Saving...</span>
-            <span v-else>Save</span></button
-          ><button
             type="reset"
             class="w-1/2 text-white block bg-rose-500 hover:bg-rose-500/75 transition-colors delay-100 focus:ring-0 font-medium rounded-md text-sm px-5 py-2 mr-2 mb-2"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            class="w-1/2 text-white block transition-colors delay-100 bg-green-600 hover:bg-green-600/75 disabled:bg-slate-600/80 disabled:cursor-progress focus:ring-0 font-medium rounded-md text-sm px-5 py-2 mr-2 mb-2"
+            :disabled="isUpdating"
+          >
+            <span v-if="isUpdating"><Spinner /> Updating...</span>
+            <span v-else>Update</span>
           </button>
         </div>
       </form>
@@ -115,12 +112,13 @@
 <script setup lang="ts">
 import Close from './icons/close.vue'
 import Spinner from './partials/Spinner.vue'
-import { NewTask } from '@types'
+import { Task } from '@types'
 import { useStore } from 'vuex'
 import { key } from '@store'
-import { generateTaskId } from '../utils/index'
+
 interface props {
   isOpen: boolean
+  task?: Task
 }
 
 //PROPS & EMITS
@@ -132,44 +130,31 @@ const props = withDefaults(defineProps<props>(), {
 //COMPOSABLES
 const store = useStore(key)
 //VARIABLES
-const newTask = ref<NewTask>({
-  description: '',
-  user: '',
-  priority: 'medium',
-  issueDate: new Date().toISOString().substring(0, 10),
-  status: 'to do'
-})
 
 //LOADINGS
-const isSaving = ref<boolean>(false)
+const isUpdating = ref<boolean>(false)
 
 //FUNCTIONS
 const closePanel = () => {
   emit('hide')
-  resetTaskObject()
 }
-const resetTaskObject = () => {
-  newTask.value = {
-    description: '',
-    user: '',
-    priority: 'medium',
-    issueDate: new Date().toISOString().substring(0, 10),
-    status: 'to do'
-  }
-}
-const createTask = async () => {
+
+const updateTask = async () => {
   try {
-    isSaving.value = true
-    await store.dispatch('createTask', { id: generateTaskId(), ...newTask.value })
-    resetTaskObject()
-    emit('hide')
+    isUpdating.value = true
+    await store.dispatch('updateTask', task.value)
+    closePanel()
   } catch (error) {
     console.log(error)
   } finally {
-    isSaving.value = false
+    isUpdating.value = false
   }
 }
 //COMPUTED & WATCHERS
+const task = computed(() => {
+  return { ...props.task }
+})
+
 watch(
   () => props.isOpen,
   () => document.getElementsByTagName('body')[0].classList.toggle('overflow-hidden')
@@ -181,7 +166,7 @@ watch(
 <style scoped>
 .panel {
   transition: all 0.3s ease-in-out;
-  transform: translateX(100%);
+  transform: translateX(-100%);
 }
 .show-backdrop {
   opacity: 100%;

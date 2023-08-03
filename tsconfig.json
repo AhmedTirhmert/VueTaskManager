@@ -22,13 +22,14 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "paths": { "@/*": ["src/*"], "@types": ["types.d.ts"] }
+    "paths": { "@/*": ["src/*"], "@types": ["types.d.ts"], "@store": ["src/store"] }
   },
   "include": [
     "vite.config.*",
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
+    "src/**/*.ts",
     "auto-imports.d.ts",
     "types.d.ts"
   ]

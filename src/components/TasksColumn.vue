@@ -1,9 +1,9 @@
 <template>
   <div
-    class="h-full bg-blue-column min-w-full flex flex-col rounded-md overflow-hidden px-2 pb-3 text-white "
+    class="h-full bg-blue-column min-w-full flex flex-col rounded-md  px-2 pb-3 text-white"
   >
     <span class="m-3 mt-4 font-bold text-gray-300 uppercase">{{ props.title }}</span>
-    <TasksList />
+    <TasksList :tasks="tasks" @select-task="taskSelected" />
   </div>
 </template>
 
@@ -14,7 +14,23 @@ interface props {
   title: string
   tasks: Task[]
 }
+
+//PROPS & EMITS
 const props = defineProps<props>()
+const emit = defineEmits(['task'])
+//COMPOSABLES
+
+//VARIABLES
+
+//LOADINGS
+
+//FUNCTIONS
+const taskSelected = (task: string) => {
+  emit('task', task)
+}
+//COMPUTED & WATCHERS
+
+//LIFE CYCLE HOOKS
 </script>
 
 <style scoped></style>
