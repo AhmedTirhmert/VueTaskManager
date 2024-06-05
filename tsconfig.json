@@ -32,5 +32,6 @@
     "src/**/*.ts",
     "auto-imports.d.ts",
     "types.d.ts"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }
